@@ -1,0 +1,6 @@
+template-file-path: testingV3.yaml
+parameters:
+  KeyPairName: US-EAST-2024
+  InstanceType: t2.micro
+  VPCId: vpc-00e95cb51612cf443
+  PublicSubnetId: subnet-0c9db5972607f6507

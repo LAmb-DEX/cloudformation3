@@ -1,0 +1,87 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: testcase1 VPC, EC2, EIP…
+
+#version3: Creates 1EC2, EC2-Sec Group, EC2-EIP, EC2-NameTag in a VPC and subnet already created
+
+#Metadata: 
+
+Parameters:
+
+  KeyPairName:
+    Description: Name of the EC2 KeyPair to allow SSH access
+    Type: AWS::EC2::KeyPair::KeyName
+
+  InstanceType:
+    Description: EC2 instance type
+    Type: String
+      
+  VPCId:
+    Description: ID of the VPC to deploy resources into
+    Type: AWS::EC2::VPC::Id
+
+  PublicSubnetId:
+    Description: ID of an existing public subnet within the specified VPC
+    Type: AWS::EC2::Subnet::Id
+
+Resources:
+  #Security Group for EC2 instance
+
+  EC2SecurityGrouptestcase1:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: EC2SecurityGrouptestcase1
+      GroupDescription: Enable SSH access and HTTP access
+      VpcId: !Ref VPCId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: EC2SecurityGroup-testcase
+
+  # Creating Elastic IP
+  EIPtestcase1:
+    Type: AWS::EC2::EIP
+    Properties:
+      InstanceId: !Ref EC2testcase1
+
+  #Creating EC2 instance
+  EC2testcase1:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-09e4ba81d75ebeb6a
+      Monitoring: false
+      SubnetId: !Ref PublicSubnetId
+      SecurityGroupIds: 
+        - !Ref EC2SecurityGrouptestcase1
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyPairName
+      #UserData: !Base64 |       
+      #!/bin/bash -ex        
+      # put your script here
+      Tags:
+        - Key: Name
+          Value: EC2-testcase1
+
+Outputs:
+
+  EC2InstanceId:
+    Description: EC2 Instance ID
+    Value: !Ref EC2testcase1
+
+  EIPElasticIP:
+    Description: Elastic IP associated with the EC2 instance
+    Value: !Ref EIPtestcase1
+
+  EC2SecurityGroupId:
+    Description: EC2 Security Group ID
+    Value: !GetAtt EC2SecurityGrouptestcase1.GroupId
